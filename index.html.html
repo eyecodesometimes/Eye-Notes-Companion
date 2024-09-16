@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eye Notes Companion by Eye/O</title>
+    <style>
+        :root {
+            --bg-color: #FFDAB9;
+            --text-color: #4A4A4A;
+            --primary-color: #FF7F50;
+            --secondary-color: #FFA07A;
+            --surface-color: #FFE4B5;
+            --hover-color: #FFDAB9;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 15px;
+            line-height: 1.6;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 2.5em;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .branding {
+            font-size: 1.2em;
+            color: var(--secondary-color);
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        #searchBar {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            background-color: var(--surface-color);
+            color: var(--text-color);
+            border: 2px solid var(--primary-color);
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+
+        #searchBar:focus {
+            outline: none;
+            box-shadow: 0 0 5px var(--primary-color);
+        }
+
+        #filters {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        select {
+            padding: 10px;
+            font-size: 16px;
+            width: 48%;
+            background-color: var(--surface-color);
+            color: var(--text-color);
+            border: 2px solid var(--secondary-color);
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+
+        select:focus {
+            outline: none;
+            box-shadow: 0 0 5px var(--secondary-color);
+        }
+
+        #results {
+            margin-top: 20px;
+        }
+
+        .result-item {
+            background-color: var(--surface-color);
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .result-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .result-item h3 {
+            color: var(--primary-color);
+            margin-top: 0;
+        }
+
+        #theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--primary-color);
+            color: var(--bg-color);
+            border: none;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        #theme-toggle:hover {
+            transform: rotate(180deg);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+            color: var(--secondary-color);
+        }
+
+        .breadcrumb {
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .breadcrumb span {
+            color: var(--primary-color);
+        }
+
+        #recentSearches {
+            margin-bottom: 15px;
+        }
+
+        #recentSearches span {
+            display: inline-block;
+            margin-right: 10px;
+            padding: 5px 10px;
+            background-color: var(--surface-color);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #recentSearches span:hover {
+            background-color: var(--hover-color);
+        }
+
+        .highlight {
+            background-color: yellow;
+            color: black;
+        }
+
+        .related-entries {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .related-entries a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .related-entries a:hover {
+            text-decoration: underline;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .web-search-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .web-search-btn:hover {
+            background-color: var(--secondary-color);
+        }
+
+        @media (max-width: 600px) {
+            #filters {
+                flex-direction: column;
+            }
+            select {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            h1 {
+                font-size: 2em;
+            }
+        }
+
+        /* Dark theme */
+        body.dark-theme {
+            --bg-color: #2C2C2C;
+            --text-color: #E0E0E0;
+            --primary-color: #FF7F50;
+            --secondary-color: #FFA07A;
+            --surface-color: #3A3A3A;
+            --hover-color: #4A4A4A;
+        }
+    </style>
+</head>
+<body>
+    <button id="theme-toggle">🌓</button>
+    <div class="container">
+        <div class="header">
+            <h1>Eye Notes Companion</h1>
+            <div class="branding">by Eye/O</div>
+        </div>
+        <div class="breadcrumb">
+            <span id="volumeBreadcrumb">All Volumes</span> > <span id="sectionBreadcrumb">All Sections</span>
+        </div>
+        <div id="recentSearches"></div>
+        <input type="text" id="searchBar" placeholder="Search chapters...">
+        <div id="filters">
+            <select id="volumeFilter">
+                <option value="">All Volumes</option>
+            </select>
+            <select id="sectionFilter">
+                <option value="">All Sections</option>
+            </select>
+        </div>
+        <div id="results">
+            <p class="loading">Start searching to see results...</p>
+        </div>
+    </div>
+
+    <script>
+        const volumeSections = {
+            1: [
+                { name: "CATARACT", start: 1, end: 58 },
+                { name: "CORNEA", start: 59, end: 107 }
+            ],
+            2: [
+                { name: "GLAUCOMA", start: 108, end: 160 },
+                { name: "NEURO-OPHTHALMOLOGY", start: 161, end: 176 },
+                { name: "OCULAR MICROBIOLOGY", start: 177, end: 180 },
+                { name: "ORBIT", start: 181, end: 215 }
+            ],
+            3: [
+                { name: "PEDIATRIC OPHTHALMOLOGY", start: 216, end: 229 },
+                { name: "RETINA", start: 230, end: 281 },
+                { name: "UVEA", start: 282, end: 308 }
+            ],
+            4: [
+                { name: "STRABISMUS", start: 309, end: 343 },
+                { name: "OPTICS AND REFRACTION", start: 344, end: 362 },
+                { name: "EXAMINATION CORNER", start: 363, end: 387 }
+            ]
+        };
+
+        const indexData = [
+  { chapter: 1, title: "Lens: Anatomy, Physiology and Biochemistry", author: "Dr. Pranesh Balasubramaniam", page: 1, volume: 1 },
+  { chapter: 2, title: "Lens: Pathogenesis and Pathology", author: "Dr. Pranesh Balasubramaniam", page: 14, volume: 1 },
+  { chapter: 3, title: "Anesthesia for Cataract Surgery", author: "Dr. Pavan Kumar M.G.", page: 29, volume: 1 },
+  { chapter: 4, title: "Preoperative Evaluation of Cataract Surgery", author: "Dr. Pavan Kumar M.G.", page: 38, volume: 1 },
+  { chapter: 5, title: "IOL Power Calculation: Biometry", author: "Dr. Aswin P. R.", page: 44, volume: 1 },
+  { chapter: 6, title: "IOL Power Calculation: Formulae", author: "Dr. Aswin P. R.", page: 58, volume: 1 },
+  { chapter: 7, title: "IOL Power Calculation: Special Situations", author: "Dr. Aswin P. R.", page: 64, volume: 1 },
+  { chapter: 8, title: "Ocular Viscosurgical Devices", author: "Dr. M. Gomathi Ramya", page: 76, volume: 1 },
+  { chapter: 9, title: "Manual Extracapsular Cataract Extraction", author: "Dr. Pavan Kumar M.G.", page: 83, volume: 1 },
+  { chapter: 10, title: "MSICS: Instrumentation", author: "Dr. Pavan Kumar M.G.", page: 89, volume: 1 },
+  { chapter: 11, title: "MSICS: Bridle Suture and Conjunctival Flap", author: "Dr. Pavan Kumar M.G.", page: 94, volume: 1 },
+  { chapter: 12, title: "MSICS: Sclero-corneal Tunnel Construction and SICS", author: "Dr. Pavan Kumar M.G.", page: 99, volume: 1 },
+  { chapter: 13, title: "MSICS: Capsulotomy and Capsulorhexis", author: "Dr. Pavan Kumar M.G.", page: 106, volume: 1 },
+  { chapter: 14, title: "MSICS: Hydro Procedures", author: "Dr. Pavan Kumar M.G.", page: 115, volume: 1 },
+  { chapter: 15, title: "MSICS: Nuclear Prolapse", author: "Dr. Pavan Kumar M.G.", page: 118, volume: 1 },
+  { chapter: 16, title: "MSICS: Nucleus Extraction", author: "Dr. Pavan Kumar M.G.", page: 125, volume: 1 },
+  { chapter: 17, title: "MSICS: Cortex Aspiration", author: "Dr. Pavan Kumar M.G.", page: 130, volume: 1 },
+  { chapter: 18, title: "MSICS: PCIOL Implantation", author: "Dr. Pavan Kumar M.G.", page: 134, volume: 1 },
+  { chapter: 19, title: "MSICS: Wound Closure", author: "Dr. Pavan Kumar M. G.", page: 138, volume: 1 },
+  { chapter: 20, title: "MSICS: Intra Operative Complications", author: "Dr. Pavan Kumar M.G.", page: 144, volume: 1 },
+  { chapter: 21, title: "MSICS: Post Operative Complications", author: "Dr. Pavan Kumar M. G.", page: 149, volume: 1 },
+  { chapter: 22, title: "Astigmatism and MSICS", author: "Dr. Pavan Kumar M.G.", page: 160, volume: 1 },
+  { chapter: 23, title: "MSICS in Hypermature Cataract", author: "Dr. Pavan Kumar M. G.", page: 167, volume: 1 },
+  { chapter: 24, title: "MSICS in High Myopia", author: "Dr. Pavan Kumar M.G.", page: 169, volume: 1 },
+  { chapter: 25, title: "MSICS in Small Pupil", author: "Dr. Pavan Kumar M.G.", page: 173, volume: 1 },
+  { chapter: 26, title: "MSICS in Traumatic Cataract", author: "Dr. Pavan Kumar M.G.", page: 177, volume: 1 },
+  { chapter: 27, title: "MSICS in Uveitic Cataract", author: "Dr. Pavan Kumar M.G.", page: 183, volume: 1 },
+  { chapter: 28, title: "MSICS in Subluxated Cataract", author: "Dr. Pavan Kumar M. G.", page: 188, volume: 1 },
+  { chapter: 29, title: "MSICS in Glaucoma Patients", author: "Dr. Pavan Kumar M.G.", page: 193, volume: 1 },
+  { chapter: 30, title: "MSICS in Vitrectomised Eyes", author: "Dr. Shivkumar Chandrashekharan", page: 198, volume: 1 },
+  { chapter: 31, title: "Converting SICS to Manual ECCE", author: "Dr. Pavan Kumar M.G.", page: 204, volume: 1 },
+  { chapter: 32, title: "Iris Sutured IOL", author: "Dr. Shivkumar Chandrashekharan", page: 206, volume: 1 },
+  { chapter: 33, title: "Iris Claw IOL", author: "Dr. Shivkumar Chandrashekharan", page: 213, volume: 1 },
+  { chapter: 34, title: "Scleral Fixated IOL", author: "Dr. Shivkumar Chandrashekharan", page: 218, volume: 1 },
+  { chapter: 35, title: "Phacodynamics", author: "Dr. Aswin P. R.", page: 232, volume: 1 },
+  { chapter: 36, title: "Phacoemulsification Techniques: Divide and Conquer", author: "Dr. Pavan Kumar M.G.", page: 252, volume: 1 },
+  { chapter: 37, title: "Phacoemulsification Techniques: Phacochop", author: "Dr. Pavan Kumar M.G.", page: 256, volume: 1 },
+  { chapter: 38, title: "Cortical Wash--Coaxial and Bimanual Irrigation Aspiration Techniques", author: "Dr. Pavan Kumar M.G.", page: 261, volume: 1 },
+  { chapter: 39, title: "Foldable IOLs, Loading and Implantation", author: "Dr. Pavan Kumar M.G.", page: 265, volume: 1 },
+  { chapter: 40, title: "Complications of Phacoemulsification: Intraoperative Complications", author: "Dr. Minu Mathen", page: 268, volume: 1 },
+  { chapter: 41, title: "Complications of Phacoemulsification: Postoperative Complications", author: "Dr. Minu Mathen", page: 273, volume: 1 },
+  { chapter: 42, title: "Managing Astigmatism During Phacoemulsification", author: "Dr. Minu Mathen", page: 284, volume: 1 },
+  { chapter: 43, title: "Phacoemulsification in Small Pupil", author: "Dr. Minu Mathen", page: 289, volume: 1 },
+  { chapter: 44, title: "Phacoemulsification in Pseudoexfoliation", author: "Dr. Minu Mathen", page: 293, volume: 1 },
+  { chapter: 45, title: "Phacoemulsification in Dense Brunescent Cataract", author: "Dr. Minu Mathen", page: 296, volume: 1 },
+  { chapter: 46, title: "Phacoemulsification in Intumescent Cataract", author: "Dr. Minu Mathen", page: 299, volume: 1 },
+  { chapter: 47, title: "Phacoemulsification: Posterior Polar Cataract", author: "Dr. Minu Mathen", page: 302, volume: 1 },
+  { chapter: 48, title: "Phacoemulsification in Extreme Axial Length", author: "Dr. Minu Mathen", page: 304, volume: 1 },
+  { chapter: 49, title: "Phacoemulsification in Uveitic Cataract", author: "Dr. Minu Mathen", page: 308, volume: 1 },
+  { chapter: 50, title: "Phacoemulsification in Subluxated Cataract", author: "Dr. Minu Mathen", page: 313, volume: 1 },
+  { chapter: 51, title: "Phacoemulsification in Combined with Vitreoretinal Surgeries", author: "Dr. Minu Mathen", page: 318, volume: 1 },
+  { chapter: 52, title: "Phacoemulsification in Aniridic Eye and Other Iris Defects", author: "Dr. Minu Mathen", page: 321, volume: 1 },
+  { chapter: 53, title: "Repositioning of IOL and IOL Exchange", author: "Dr. Minu Mathen", page: 326, volume: 1 },
+  { chapter: 54, title: "Femto Laser Assisted Cataract Surgery: General Principles", author: "Dr. M. Gomathi Ramya", page: 329, volume: 1 },
+  { chapter: 55, title: "Femto Laser Assisted Cataract Surgery: Regular Cases", author: "Dr. M. Gomathi Ramya", page: 336, volume: 1 },
+  { chapter: 56, title: "Femto Laser Assisted Cataract Surgery: Complicated Cases", author: "Dr. M. Gomathi Ramya", page: 349, volume: 1 },
+  { chapter: 57, title: "Lens Induced Glaucoma", author: "Dr. Pavan Kumar M. G.", page: 353, volume: 1 },
+  { chapter: 58, title: "Instrument Sterilization", author: "Dr. M. Kumaran", page: 360, volume: 1 },
+  { chapter: 59, title: "Cornea: Embryology and Anatomy", author: "Dr. Pranesh Balasubramaniam", page: 377, volume: 1 },
+  { chapter: 60, title: "Cornea: Physiology and Biochemistry", author: "Dr. Pranesh Balasubramaniam", page: 388, volume: 1 },
+  { chapter: 61, title: "Sclera", author: "Dr. Pranesh Balasubramaniam", page: 397, volume: 1 },
+  { chapter: 62, title: "Conjunctiva", author: "Dr. Pranesh Balasubramaniam", page: 402, volume: 1 },
+  { chapter: 63, title: "Tear Film", author: "Dr. Pranesh Balasubramaniam", page: 408, volume: 1 },
+  { chapter: 64, title: "Corneal Topography: Basic Principles and Orbscan Imaging", author: "Dr. N. Venkatesh Prajna", page: 412, volume: 1 },
+  { chapter: 65, title: "Corneal Topography: Scheimpflug Imaging--Pentacam", author: "Dr. N. Venkatesh Prajna", page: 417, volume: 1 },
+  { chapter: 66, title: "Corneal Topography: Imaging Clinical Conditions", author: "Dr. N. Venkatesh Prajna", page: 426, volume: 1 },
+  { chapter: 67, title: "Specular Microscopy", author: "Dr. N. Venkatesh Prajna", page: 440, volume: 1 },
+  { chapter: 68, title: "Confocal Microscopy", author: "Dr. N. Venkatesh Prajna", page: 454, volume: 1 },
+  { chapter: 69, title: "Bacterial Keratitis", author: "Dr. N. Venkatesh Prajna", page: 464, volume: 1 },
+  { chapter: 70, title: "Fungal Keratitis", author: "Dr. N. Venkatesh Prajna", page: 479, volume: 1 },
+  { chapter: 71, title: "Acanthamoeba Keratitis", author: "Dr. N. Venkatesh Prajna", page: 497, volume: 1 },
+  { chapter: 72, title: "Microsporldial Keratitis", author: "Dr. N. Venkatesh Prajna", page: 506, volume: 1 },
+  { chapter: 73, title: "Herpes Simplex Keratitis: Clinical Features", author: "Dr. N. Venkatesh Prajna", page: 511, volume: 1 },
+  { chapter: 74, title: "Herpes Simplex Keratitis: Management", author: "Dr. N. Venkatesh Prajna", page: 524, volume: 1 },
+  { chapter: 75, title: "Herpes Zoster Keratitis", author: "Dr. N. Venkatesh Prajna", page: 532, volume: 1 },
+  { chapter: 76, title: "Non-healing Corneal Ulcers", author: "Dr. N. Venkatesh Prajna", page: 541, volume: 1 },
+  { chapter: 77, title: "Peripheral Ulcerative Keratitis: General Concepts", author: "Dr. N. Venkatesh Prajna", page: 544, volume: 1 },
+  { chapter: 78, title: "Peripheral Ulcerative Keratitis: Mooren's Ulcer", author: "Dr. N. Venkatesh Prajna", page: 555, volume: 1 },
+  { chapter: 79, title: "Peripheral Ulcerative Keratitis: Management", author: "Dr. N. Venkatesh Prajna", page: 563, volume: 1 },
+  { chapter: 80, title: "Corneal Ectatic Disorders: Keratoconus -- Clinical Features", author: "Dr. N. Venkatesh Prajna", page: 571, volume: 1 },
+  { chapter: 81, title: "Corneal Ectatic Disorders: PMD, Keratoglobus and Terriens", author: "Dr. N. Venkatesh Prajna", page: 581, volume: 1 },
+  { chapter: 82, title: "Corneal Ectatic Disorders: Non-surgical Management", author: "Dr. Preethika Gandhi", page: 585, volume: 1 },
+  { chapter: 83, title: "Corneal Ectatic Disorders: Surgical Management", author: "Dr. N. Venkatesh Prajna", page: 598, volume: 1 },
+  { chapter: 84, title: "Pterygium: Clinical Features", author: "Dr. N. Venkatesh Prajna", page: 610, volume: 1 },
+  { chapter: 85, title: "Pterygium: Management, CAG and AMT", author: "Dr. N. Venkatesh Prajna", page: 616, volume: 1 },
+  { chapter: 86, title: "Pterygium: Adjuvants and Other Surgeries", author: "Dr. N. Venkatesh Prajna", page: 624, volume: 1 },
+  { chapter: 87, title: "Limbal Stem Cell Deficiency: Clinical Features", author: "Dr. N. Venkatesh Prajna", page: 630, volume: 1 },
+  { chapter: 88, title: "Limbal Stem Cell Deficiency: Management", author: "Dr. N. Venkatesh Prajna", page: 635, volume: 1 },
+  { chapter: 89, title: "Cicatricial Conjunctival Disorders -- I", author: "Dr. Geetha Iyer", page: 645, volume: 1 },
+  { chapter: 90, title: "Ocular Cicatricial Pemphigoid (OCP): An Overview of Current Understanding -- II", author: "Dr. Geetha Iyer", page: 649, volume: 1 },
+  { chapter: 91, title: "Chemical Injuries of the Eye", author: "Dr. Geetha Iyer", page: 659, volume: 1 },
+  { chapter: 92, title: "Limbal Epithelial Transplantation (SLET and CLET, Buccal)", author: "Dr. Geetha Iyer", page: 679, volume: 1 },
+  { chapter: 93, title: "Amniotic Membrane Transplantation", author: "Dr. Geetha Iyer", page: 686, volume: 1 },
+  { chapter: 94, title: "Keratoprosthesis", author: "Dr. Geetha Iyer", page: 699, volume: 1 },
+  { chapter: 95, title: "Management of Ocular Trauma", author: "Dr. N. Venkatesh Prajna", page: 723, volume: 1 },
+  { chapter: 96, title: "Contact Lens", author: "Dr. Preethika Gandhi", page: 741, volume: 1 },
+  { chapter: 97, title: "Cornea Retrieval and Eye Banking", author: "Dr. Navneet Sidhu", page: 760, volume: 1 },
+  { chapter: 98, title: "Penetrating Keratoplasty", author: "Dr. N. Venkatesh Prajna", page: 771, volume: 1 },
+  { chapter: 99, title: "Therapeutic Keratoplasty", author: "Dr. N. Venkatesh Prajna", page: 786, volume: 1 },
+  { chapter: 100, title: "Graft Rejection: Pathogenesis and Clinical Features", author: "Dr. N. Venkatesh Prajna", page: 794, volume: 1 },
+  { chapter: 101, title: "Graft Rejection: Treatment", author: "Dr. N. Venkatesh Prajna", page: 806, volume: 1 },
+  { chapter: 102, title: "Refractive Surgery: Concepts and Classification", author: "Dr. N. Venkatesh Prajna", page: 813, volume: 1 },
+  { chapter: 103, title: "Refractive Surgery: Concepts of Laser Refractive Surgery", author: "Dr. N. Venkatesh Prajna", page: 818, volume: 1 },
+  { chapter: 104, title: "Refractive Surgery: Procedures of Laser Refractive Surgery", author: "Dr. N. Venkatesh Prajna", page: 826, volume: 1 },
+  { chapter: 105, title: "Refractive Surgery: Surgical Options for Lasik Rejects", author: "Dr. N. Venkatesh Prajna", page: 835, volume: 1 },
+  { chapter: 106, title: "Deep Anterior Lamellar Keratoplasty", author: "Dr. Preethika Gandhi", page: 840, volume: 1 },
+  { chapter: 107, title: "Descemet Stripping Automated Endothelial Keratoplasty (DSAEK)", author: "Dr. Preethika Gandhi", page: 849, volume: 1 },
+  { chapter: 108, title: "The Angle of Anterior Chamber: Anatomy and Embryology", author: "Dr. Pranesh Balasubramaniam", page: 859, volume: 2 },
+  { chapter: 109, title: "The Angle of Anterior Chamber: Physiology, Biochemistry and Pharmacology", author: "Dr. Pranesh Balasubramaniam", page: 870, volume: 2 },
+  { chapter: 110, title: "Aqueous Humour Dynamics", author: "Dr. Neethu Mohan", page: 878, volume: 2 },
+  { chapter: 111, title: "Tonometry", author: "Dr. Neethu Mohan", page: 884, volume: 2 },
+  { chapter: 112, title: "Central Corneal Thickness and Glaucoma", author: "Dr. Neethu Mohan", page: 895, volume: 2 },
+  { chapter: 113, title: "Gonioscopy: Tips and Tricks", author: "Dr. Talvir Sidhu", page: 900, volume: 2 },
+  { chapter: 114, title: "Pathogenesis of Glaucomatous Optic Neuropathy", author: "Dr. Annamalai O.", page: 903, volume: 2 },
+  { chapter: 115, title: "Clinical Evaluation of the Optic Nerve Head", author: "Dr. S. Kavitha", page: 910, volume: 2 },
+  { chapter: 116, title: "Optic Nerve Head Changes in Glaucoma", author: "Dr. S. Kavitha", page: 923, volume: 2 },
+  { chapter: 117, title: "Interpreting Humphrey Visual Field Reports", author: "Dr. Murali Ariga", page: 947, volume: 2 },
+  { chapter: 118, title: "Interpreting Octopus Perimetry Reports", author: "Dr. Murali Ariga", page: 978, volume: 2 },
+  { chapter: 119, title: "Anterior Segment Imaging: UBM and ASOCT", author: "Dr. A. Vijayalakshmi", page: 992, volume: 2 },
+  { chapter: 120, title: "Optic Nerve Head in Glaucoma", author: "Dr. Talvir Sidhu", page: 1008, volume: 2 },
+  { chapter: 121, title: "Classification of Glaucoma", author: "Dr. R. Sharmila", page: 1027, volume: 2 },
+  { chapter: 122, title: "Ocular Hypertension", author: "Dr. R. Sharmila", page: 1034, volume: 2 },
+  { chapter: 123, title: "Primary Open Angle Glaucoma", author: "Dr. Neethu Mohan", page: 1042, volume: 2 },
+  { chapter: 124, title: "Normal Tension Glaucoma (Low Tension Glaucoma)", author: "Dr. Murali Ariga", page: 1054, volume: 2 },
+  { chapter: 125, title: "PACD: Classification, Mechanism and Risk Factors", author: "Dr. S. Kavitha", page: 1067, volume: 2 },
+  { chapter: 126, title: "PACD: Symptoms, Clinical Evaluation and Management", author: "Dr. S. Kavitha", page: 1070, volume: 2 },
+  { chapter: 127, title: "PACD: Differential Diagnosis and Management of APAC", author: "Dr. S. Kavitha", page: 1081, volume: 2 },
+  { chapter: 128, title: "Pseudoexfoliation Glaucoma: Epidemiology and Etiopathogenesis", author: "Dr. S. Kavitha", page: 1090, volume: 2 },
+  { chapter: 129, title: "Pseudoexfoliation Glaucoma: Clinical Features, Diagnosis and Management", author: "Dr. S. Kavitha", page: 1095, volume: 2 },
+  { chapter: 130, title: "Pigmentary Glaucoma: Epidemiology and Etiopathogenesis", author: "Dr. S. Kavitha", page: 1105, volume: 2 },
+  { chapter: 131, title: "Pigmentary Glaucoma: Clinical Phases, Diagnosis and Management", author: "Dr. S. Kavitha", page: 1110, volume: 2 },
+  { chapter: 132, title: "Lens Induced Glaucoma", author: "Dr. A. Vijayalakshmi", page: 1115, volume: 2 },
+  { chapter: 133, title: "Uveitic Glaucoma", author: "Dr. A. Vijayalakshmi", page: 1121, volume: 2 },
+  { chapter: 134, title: "Neovascular Glaucoma: Etiopathogenesis and Clinical Features", author: "Dr. Sirisha Senthil", page: 1128, volume: 2 },
+  { chapter: 135, title: "Neovascular Glaucoma: Evaluation and Management", author: "Dr. Sirisha Senthil", page: 1133, volume: 2 },
+  { chapter: 136, title: "Glaucoma Associated with Ocular Trauma", author: "Dr. Neethu Mohan", page: 1138, volume: 2 },
+  { chapter: 137, title: "Nanophthalmos and Other Secondary Angle Closure Glaucoma", author: "Dr. R. Sharmila", page: 1150, volume: 2 },
+  { chapter: 138, title: "Glaucoma after Vitreoretinal Procedures/Surgery", author: "Dr. R. Sharmila", page: 1161, volume: 2 },
+  { chapter: 139, title: "Steroid Induced Glaucoma", author: "Dr. Annamalai O.", page: 1169, volume: 2 },
+  { chapter: 140, title: "Glaucoma Following Penetrating Keratoplasty", author: "Dr. Ganesh V. Raman", page: 1179, volume: 2 },
+  { chapter: 141, title: "Glaucoma Associated with Corneal Disorders", author: "Dr. Ganesh V. Raman", page: 1185, volume: 2 },
+  { chapter: 142, title: "Classification of Pediatric Glaucoma", author: "Dr. Sirisha Senthil", page: 1196, volume: 2 },
+  { chapter: 143, title: "Primary Congenital Glaucoma: Clinical Features and Differential Diagnosis", author: "Dr. Sirisha Senthil", page: 1201, volume: 2 },
+  { chapter: 144, title: "Primary Congenital Glaucoma: Management", author: "Dr. Sirisha Senthil", page: 1210, volume: 2 },
+  { chapter: 145, title: "Juvenile Open Angle Glaucoma", author: "Dr. Ganesh V. Raman", page: 1216, volume: 2 },
+  { chapter: 146, title: "Glaucoma in Phacomatoses", author: "Dr. Deeba Ishrath", page: 1221, volume: 2 },
+  { chapter: 147, title: "Target Intra Ocular Pressure", author: "Dr. Murali Ariga", page: 1234, volume: 2 },
+  { chapter: 148, title: "Medical Management of Glaucoma: Aim and Principles of Prescribing Medications", author: "Dr. Ganesh V. Raman", page: 1243, volume: 2 },
+  { chapter: 149, title: "Medical Management of Glaucoma: Detailed Pharmacology", author: "Dr. Ganesh V. Raman", page: 1255, volume: 2 },
+  { chapter: 150, title: "Newer Ocular Hypotensive Medications", author: "Dr. R. Sharmila", page: 1264, volume: 2 },
+  { chapter: 151, title: "Neuroprotection", author: "Dr. Ganesh V. Raman", page: 1270, volume: 2 },
+  { chapter: 152, title: "Introduction, Laser Procedures in Glaucoma", author: "Dr. S. Kavitha", page: 1276, volume: 2 },
+  { chapter: 153, title: "Laser Peripheral Iridotomy", author: "Dr. S. Kavitha", page: 1279, volume: 2 },
+  { chapter: 154, title: "Lasers other than YAG PI", author: "Dr. S. Kavitha", page: 1286, volume: 2 },
+  { chapter: 155, title: "Trabeculectomy: Basics, Surgical Steps and Adjuvants", author: "Dr. Tanuj Dada", page: 1293, volume: 2 },
+  { chapter: 156, title: "Trabeculectomy: Complications and Management", author: "Dr. Tanuj Dada", page: 1302, volume: 2 },
+  { chapter: 157, title: "Glaucoma Drainage Devices", author: "Dr. George V. Puthuran", page: 1308, volume: 2 },
+  { chapter: 158, title: "Non-penetrating Deep Sclerectomy", author: "Dr. Ganesh V. Raman", page: 1318, volume: 2 },
+  { chapter: 159, title: "Minimally Invasive Glaucoma Surgery (MIGS)", author: "Dr. Murali Ariga", page: 1324, volume: 2 },
+  { chapter: 160, title: "Cyclodestructive Procedures", author: "Dr. Murali Ariga", page: 1330, volume: 2 },
+  { chapter: 161, title: "Pearls in Neuro-ophthalmology", author: "Dr. Mahesh Kumar", page: 1338, volume: 2 },
+  { chapter: 162, title: "Neuro-ophthalmic Cases: Case Scenarios", author: "Dr. Mahesh Kumar", page: 1347, volume: 2 },
+  { chapter: 163, title: "Approach to Neuroimaging in Neuro-ophthalmology", author: "Dr. Mahesh Kumar", page: 1360, volume: 2 },
+  { chapter: 164, title: "Approach to a Case of Double Vision", author: "Dr. Mahesh Kumar", page: 1375, volume: 2 },
+  { chapter: 165, title: "Optic Neuritis", author: "Dr. A. Kowsalya", page: 1382, volume: 2 },
+  { chapter: 166, title: "Optic Atrophy", author: "Dr. A. Kowsalya", page: 1400, volume: 2 },
+  { chapter: 167, title: "Papilledema", author: "Dr. A. Kowsalya", page: 1415, volume: 2 },
+  { chapter: 168, title: "Double Vision: A 10-step Assessment Plan", author: "Dr. Navin Jayakumar", page: 1438, volume: 2 },
+  { chapter: 169, title: "Neuro-ophthalmic Examination: An Overview", author: "Dr. Navin Jayakumar", page: 1443, volume: 2 },
+  { chapter: 170, title: "Evaluation of a Pale Optic Disc", author: "Dr. Navin Jayakumar", page: 1456, volume: 2 },
+  { chapter: 171, title: "Optic Neuropathy", author: "Dr. Navin Jayakumar", page: 1461, volume: 2 },
+  { chapter: 172, title: "Pupil Pathways and Inference", author: "Dr. Navin Jayakumar", page: 1473, volume: 2 },
+  { chapter: 173, title: "Bilateral Ocular Motility Disorders: A Differential Diagnosis", author: "Dr. Navin Jayakumar", page: 1483, volume: 2 },
+  { chapter: 174, title: "An Approach to Swollen Optic Discs", author: "Dr. Navin Jayakumar", page: 1491, volume: 2 },
+  { chapter: 175, title: "Visual Fields in Neuro-ophthalmology", author: "Dr. Navin Jayakumar", page: 1502, volume: 2 },
+  { chapter: 176, title: "Nystagmus Evaluation", author: "Dr. Rashmin Gandhi", page: 1512, volume: 2 },
+  { chapter: 177, title: "Basic Microbiology: Classification and Types", author: "Dr. Savitri Sharma", page: 1518, volume: 2 },
+  { chapter: 178, title: "Basic Microbiology: Sampling & Microscopy and Ocular Parasites", author: "Dr. Savitri Sharma", page: 1524, volume: 2 },
+  { chapter: 179, title: "Antibiotics: Therapy and Testing", author: "Dr. Savitri Sharma", page: 1533, volume: 2 },
+  { chapter: 180, title: "Molecular Diagnosis in Ocular Microbiology", author: "Dr. Savitri Sharma", page: 1544, volume: 2 },
+  { chapter: 181, title: "Clinical Anatomy of the Orbit", author: "Dr. Pranesh Balasubramaniam", page: 1548, volume: 2 },
+  { chapter: 182, title: "Lacrimal Apparatus", author: "Dr. Pranesh Balasubramaniam", page: 1573, volume: 2 },
+  { chapter: 183, title: "Thyroid Orbitopathy", author: "Dr. Milind N. Naik", page: 1580, volume: 2 },
+  { chapter: 184, title: "Imaging of the Orbit: Computed Tomography Scan", author: "Dr. Milind N. Naik", page: 1592, volume: 2 },
+  { chapter: 185, title: "Orbital Decompression for Thyroid Orbitopathy", author: "Dr. Milind N. Naik", page: 1608, volume: 2 },
+  { chapter: 186, title: "Proptosis", author: "Dr. Usha Kim", page: 1620, volume: 2 },
+  { chapter: 187, title: "Orbital Trauma: Considerations and Principles", author: "Dr. Usha Kim", page: 1628, volume: 2 },
+  { chapter: 188, title: "Orbital Fractures and Management", author: "Dr. Usha Kim", page: 1638, volume: 2 },
+  { chapter: 189, title: "Orbital Infections", author: "Dr. Usha Kim", page: 1646, volume: 2 },
+  { chapter: 190, title: "Fungal Infections", author: "Dr. Usha Kim", page: 1657, volume: 2 },
+  { chapter: 191, title: "Parasitic Infections", author: "Dr. Usha Kim", page: 1664, volume: 2 },
+  { chapter: 192, title: "Orbital Inflammations", author: "Dr. Usha Kim", page: 1669, volume: 2 },
+  { chapter: 193, title: "Anophthalmic Socket", author: "Dr. Usha Kim", page: 1676, volume: 2 },
+  { chapter: 194, title: "Contracted Socket", author: "Dr. Usha Kim", page: 1686, volume: 2 },
+  { chapter: 195, title: "Benign Tumors of Orbit", author: "Dr. Usha Kim", page: 1691, volume: 2 },
+  { chapter: 196, title: "Vascular Lesions of Orbit", author: "Dr. Usha Kim", page: 1701, volume: 2 },
+  { chapter: 197, title: "Blepharoptosis: Evaluation and Management", author: "Dr. Milind N. Naik", page: 1712, volume: 2 },
+  { chapter: 198, title: "Eyelid Retraction", author: "Dr. Milind N. Naik", page: 1729, volume: 2 },
+  { chapter: 199, title: "Ectropion", author: "Dr. Usha Kim", page: 1741, volume: 2 },
+  { chapter: 200, title: "Entropion", author: "Dr. Usha Kim", page: 1748, volume: 2 },
+  { chapter: 201, title: "Esthetic Eyelid Surgery", author: "Dr. Milind N. Naik", page: 1755, volume: 2 },
+  { chapter: 202, title: "Basics of Eyelid Reconstruction", author: "Dr. Usha Kim", page: 1768, volume: 2 },
+  { chapter: 203, title: "Overview of Eyelid Reconstruction", author: "Dr. Usha Kim", page: 1773, volume: 2 },
+  { chapter: 204, title: "Lacrimal Drainage System: Anatomy and Anomalies", author: "Dr. Usha Kim", page: 1783, volume: 2 },
+  { chapter: 205, title: "Evaluation of the Lacrimal System", author: "Dr. Usha Kim", page: 1788, volume: 2 },
+  { chapter: 206, title: "Congenital Nasolacrimal Duct Obstruction", author: "Dr. Usha Kim", page: 1794, volume: 2 },
+  { chapter: 207, title: "Adult Nasolacrimal Duct Obstruction", author: "Dr. Usha Kim", page: 1802, volume: 2 },
+  { chapter: 208, title: "Botulinum Toxin in Ophthalmology", author: "Dr. Milind N. Naik", page: 1813, volume: 2 },
+  { chapter: 209, title: "Orbitotomy: Introduction", author: "Dr. Usha Kim", page: 1821, volume: 2 },
+  { chapter: 210, title: "Lateral Orbitotomy", author: "Dr. Usha Kim", page: 1827, volume: 2 },
+  { chapter: 211, title: "Orbitotomy: Other Approaches", author: "Dr. Usha Kim", page: 1832, volume: 2 },
+  { chapter: 212, title: "Oncology: Tumors of the Eyelid", author: "Dr. Santosh G. Honavar", page: 1836, volume: 2 },
+  { chapter: 213, title: "Oncology: Logical Approach to Orbital Tumors", author: "Dr. Santosh G. Honavar", page: 1852, volume: 2 },
+  { chapter: 214, title: "Oncology: Tumors of the Ocular Surface", author: "Dr. Santosh G. Honavar", page: 1870, volume: 2 },
+  { chapter: 215, title: "Oncology: Intraocular Tumors go by the Colors", author: "Dr. Santosh G. Honavar", page: 1885, volume: 2 },
+  { chapter: 216, title: "Development of Visual System", author: "Dr. Sahithya Bhaskaran", page: 1907, volume: 3 },
+  { chapter: 217, title: "Typical Development of Visual Milestones", author: "Dr. P. Vijayalakshmi", page: 1913, volume: 3 },
+  { chapter: 218, title: "Estimation of Visual Acuity in Children", author: "Dr. Sahithya Bhaskaran", page: 1920, volume: 3 },
+  { chapter: 219, title: "Estimation of Visual Acuity in Infants", author: "Dr. Sahithya Bhaskaran", page: 1927, volume: 3 },
+  { chapter: 220, title: "Childhood Refractive Errors & Guidelines on Management", author: "Dr. Meenakshi Swaminathan", page: 1935, volume: 3 },
+  { chapter: 221, title: "Lazy Eye", author: "Dr. Meenakshi Swaminathan", page: 1950, volume: 3 },
+  { chapter: 222, title: "Red Eye in a Child and Vitamin A Deficiency", author: "Dr. Sathya T. Ravilla", page: 1964, volume: 3 },
+  { chapter: 223, title: "Syndromes with Ocular Manifestations", author: "Dr. Sahithya Bhaskaran", page: 1974, volume: 3 },
+  { chapter: 224, title: "Low Vision (Visual Impairment)", author: "Dr. Sahithya Bhaskaran", page: 1984, volume: 3 },
+  { chapter: 225, title: "Vision Assessment in Children with Low Vision", author: "Dr. Sahithya Bhaskaran", page: 1992, volume: 3 },
+  { chapter: 226, title: "Low Vision Aids: Optical", author: "Dr. Sahithya Bhaskaran", page: 2001, volume: 3 },
+  { chapter: 227, title: "Non Optical Aids and Rehabilitation", author: "Dr. Sahithya Bhaskaran", page: 2010, volume: 3 },
+  { chapter: 228, title: "Headache in Children", author: "Dr. Sahithya Bhaskaran", page: 2015, volume: 3 },
+  { chapter: 229, title: "Ocular Causes of Headache", author: "Dr. Sahithya Bhaskaran", page: 2022, volume: 3 },
+  { chapter: 230, title: "Macular Function Tests: Psychophysical Tests", author: "Dr. Chitaranjan Mishra", page: 2031, volume: 3 },
+  { chapter: 231, title: "Macular Function Tests: Electrophysiological Tests", author: "Dr. Chitaranjan Mishra", page: 2043, volume: 3 },
+  { chapter: 232, title: "Fundus Fluorescein Angiography: Basics", author: "Dr. Pradeep Sagar", page: 2052, volume: 3 },
+  { chapter: 233, title: "Fundus Fluorescein Angiography: Clinical Conditions", author: "Dr. Pradeep Sagar", page: 2063, volume: 3 },
+  { chapter: 234, title: "Indocyanine Green Angiography", author: "Dr. Pradeep Sagar", page: 2084, volume: 3 },
+  { chapter: 235, title: "Optical Coherence Tomography (OCT) in Retina Practice", author: "Dr. George J. Manayath", page: 2094, volume: 3 },
+  { chapter: 236, title: "OCT Angiography in Retina Practice", author: "Dr. George J. Manayath", page: 2108, volume: 3 },
+  { chapter: 237, title: "Ultrasound and UBM", author: "Dr. Muna Bhende", page: 2121, volume: 3 },
+  { chapter: 238, title: "Fundus Autofluorescence and Multicolor Imaging", author: "Dr. Anand Rajendran", page: 2142, volume: 3 },
+  { chapter: 239, title: "Retina: Anatomy", author: "Dr. Pranesh Balasubramaniam", page: 2158, volume: 3 },
+  { chapter: 240, title: "Retina: Physiology and Biochemistry", author: "Dr. Pranesh Balasubramaniam", page: 2168, volume: 3 },
+  { chapter: 241, title: "Vitreous", author: "Dr. Pranesh Balasubramaniam", page: 2174, volume: 3 },
+  { chapter: 242, title: "Evaluation of Retina and Vitreous", author: "Dr. Karthik Srinivasan", page: 2180, volume: 3 },
+  { chapter: 243, title: "Diabetic Retinopathy: Epidemiology, Pathogenesis and Clinical Features", author: "Dr. Anand Rajendran", page: 2194, volume: 3 },
+  { chapter: 244, title: "Diabetic Retinopathy: Investigations and Treatment", author: "Dr. Anand Rajendran", page: 2206, volume: 3 },
+  { chapter: 245, title: "Hypertension and the Eye", author: "Dr. Anand Rajendran", page: 2223, volume: 3 },
+  { chapter: 246, title: "Central Retinal Vein Occlusion", author: "Dr. Anand Rajendran", page: 2235, volume: 3 },
+  { chapter: 247, title: "Branch Retinal Vein Occlusion", author: "Dr. Anand Rajendran", page: 2247, volume: 3 },
+  { chapter: 248, title: "ARMD: Epidemiology, Classification & Dry", author: "Dr. George J. Manayath", page: 2257, volume: 3 },
+  { chapter: 249, title: "ARMD: Neovascular- Diagnosis & Imaging", author: "Dr. George J. Manayath", page: 2265, volume: 3 },
+  { chapter: 250, title: "ARMD: Neovascular- Management", author: "Dr. George J. Manayath", page: 2279, volume: 3 },
+  { chapter: 251, title: "Pachychoroid Spectrum Disease Introduction and Pachychoroid Pigment Epitheliopathy", author: "Dr. George J. Manayath", page: 2288, volume: 3 },
+  { chapter: 252, title: "Central Serous Chorioretinopathy", author: "Dr. George J. Manayath", page: 2295, volume: 3 },
+  { chapter: 253, title: "Pachychoroid Neovasculopathy & Polypoidal Choroidal Vasculopathy (PCV)", author: "Dr. George J. Manayath", page: 2314, volume: 3 },
+  { chapter: 254, title: "Peripapillary Pachychoroid Syndrome & Focal Choroidal Excavation", author: "Dr. George J. Manayath", page: 2327, volume: 3 },
+  { chapter: 255, title: "Hereditary Macular Dystrophies", author: "Dr. Muna Bhende", page: 2333, volume: 3 },
+  { chapter: 256, title: "Macular Pathologies", author: "Dr. R. Kim", page: 2347, volume: 3 },
+  { chapter: 257, title: "Peripheral Retinal Degenerations", author: "Dr. Karthik Srinivasan", page: 2360, volume: 3 },
+  { chapter: 258, title: "Retinopathy of Prematurity: Etiopathogenesis, Risk factors & Screening", author: "Dr. Parag K. Shah", page: 2369, volume: 3 },
+  { chapter: 259, title: "Retinopathy of Prematurity: 2021 Revised Classification", author: "Dr. Parag K. Shah", page: 2379, volume: 3 },
+  { chapter: 260, title: "Retinopathy of Prematurity: Management", author: "Dr. Parag K. Shah", page: 2390, volume: 3 },
+  { chapter: 261, title: "Melanoma PG 1", author: "Dr. P. Mahesh Shanmugam", page: 2396, volume: 3 },
+  { chapter: 262, title: "Retinoblastoma", author: "Dr. P. Mahesh Shanmugam", page: 2406, volume: 3 },
+  { chapter: 263, title: "Paraneoplastic Retinopathy", author: "Dr. P. Mahesh Shanmugam", page: 2422, volume: 3 },
+  { chapter: 264, title: "Vascular Tumors of Retina and Choroid", author: "Dr. P. Mahesh Shanmugam", page: 2428, volume: 3 },
+  { chapter: 265, title: "Lasers in Retina", author: "Dr. George J. Manayath", page: 2439, volume: 3 },
+  { chapter: 266, title: "Intravitreal Injections: Techniques and Complications", author: "Dr. George J. Manayath", page: 2454, volume: 3 },
+  { chapter: 267, title: "Intravitreal Injections: Indications & Current Protocols for Retinal Diseases", author: "Dr. George J. Manayath", page: 2463, volume: 3 },
+  { chapter: 268, title: "Rhegmatogenous Retinal Detachment", author: "Dr. Rajesh Ramanjulu", page: 2477, volume: 3 },
+  { chapter: 269, title: "Non Rhegmatogenous Retinal Detachment", author: "Dr. Rajesh Ramanjulu", page: 2493, volume: 3 },
+  { chapter: 270, title: "Posterior Segment Trauma: Closed Globe Injury", author: "Dr. Divyansh K. Mishra", page: 2502, volume: 3 },
+  { chapter: 271, title: "Posterior Segment Trauma: Open Globe Injury", author: "Dr. Divyansh K. Mishra", page: 2520, volume: 3 },
+  { chapter: 272, title: "Hematological Conditions", author: "Dr. Chitaranjan Mishra", page: 2556, volume: 3 },
+  { chapter: 273, title: "Endocrine/Metabolic Conditions", author: "Dr. Chitaranjan Mishra", page: 2564, volume: 3 },
+  { chapter: 274, title: "Inflammatory/Autoimmune Conditions", author: "Dr. Chitaranjan Mishra", page: 2569, volume: 3 },
+  { chapter: 275, title: "Infective Conditions", author: "Dr. Chitaranjan Mishra", page: 2577, volume: 3 },
+  { chapter: 276, title: "Congenital Conditions", author: "Dr. Chitaranjan Mishra", page: 2584, volume: 3 },
+  { chapter: 277, title: "Miscellaneous Conditions", author: "Dr. Chitaranjan Mishra", page: 2594, volume: 3 },
+  { chapter: 278, title: "Principles of Vitreoretinal Surgery", author: "Dr. Anusha Venkataraman", page: 2601, volume: 3 },
+  { chapter: 279, title: "Intraocular Foreign Body", author: "Dr. Muna Bhende", page: 2618, volume: 3 },
+  { chapter: 280, title: "Post Operative Endophthalmitis: 10 Things you Should Know", author: "Dr. Muna Bhende", page: 2628, volume: 3 },
+  { chapter: 281, title: "AI in Ophthalmology", author: "Dr. R. Kim", page: 2639, volume: 3 },
+  { chapter: 282, title: "Uvea Tract: Embryology and Anatomy", author: "Dr. Pranesh Balasubramaniam", page: 2646, volume: 3 },
+  { chapter: 283, title: "Uvea Tract: Pathology and Blood Supply", author: "Dr. Pranesh Balasubramaniam", page: 2656, volume: 3 },
+  { chapter: 284, title: "Standardization of Uveitis Nomenclature", author: "Dr. S. R. Rathinam", page: 2664, volume: 3 },
+  { chapter: 285, title: "Systematic Work Up: Uveitis", author: "Dr. S. R. Rathinam", page: 2674, volume: 3 },
+  { chapter: 286, title: "Construction of Differential Diagnosis in Uveitis", author: "Dr. S. R. Rathinam", page: 2681, volume: 3 },
+  { chapter: 287, title: "Art of Ordering Lab Investigations in Uveitis", author: "Dr. S. R. Rathinam", page: 2691, volume: 3 },
+  { chapter: 288, title: "Immunosuppressives and New Biologicals", author: "Dr. S. R. Rathinam", page: 2710, volume: 3 },
+  { chapter: 289, title: "Ocular Tuberculosis", author: "Dr. Radhika T", page: 2721, volume: 3 },
+  { chapter: 290, title: "Viral Anterior Uveitis: Clinical Features and Causes", author: "Dr. Anuradha V. K.", page: 2741, volume: 3 },
+  { chapter: 291, title: "Viral Anterior Uveitis: Differential Diagnosis and Treatment", author: "Dr. Anuradha V. K.", page: 2750, volume: 3 },
+  { chapter: 292, title: "Viral Uveitis: Acute Retinal Necrosis (ARN)", author: "Dr. Anuradha V. K.", page: 2754, volume: 3 },
+  { chapter: 293, title: "Viral Uveitis: Progressive Outer Retinal Necrosis", author: "Dr. Anuradha V. K.", page: 2758, volume: 3 },
+  { chapter: 294, title: "Viral Uveitis: Newer Viral Uveitis", author: "Dr. Anuradha V. K.", page: 2761, volume: 3 },
+  { chapter: 295, title: "Cytomegalovirus (CMV) Posterior Uveitis", author: "Dr. Anuradha V. K.", page: 2767, volume: 3 },
+  { chapter: 296, title: "Leptospirosis and Syphilitic Uveitis", author: "Dr. S. R. Rathinam", page: 2776, volume: 3 },
+  { chapter: 297, title: "Ocular Toxoplasma: Clinical Presentations", author: "Dr. S. Bala Murugan", page: 2788, volume: 3 },
+  { chapter: 298, title: "Ocular Toxoplasma: Diagnosis and Treatment", author: "Dr. S. Bala Murugan", page: 2799, volume: 3 },
+  { chapter: 299, title: "Basic Immunology", author: "Dr. Anuradha V.K.", page: 2818, volume: 3 },
+  { chapter: 300, title: "Mechanism of Autoimmunity and Autoimmune v/s Autoinflammatory Diseases", author: "Dr. Anuradha V. K.", page: 2826, volume: 3 },
+  { chapter: 301, title: "Immune Privilege & the Eye and Mechanism of Autoimmune Uveitis", author: "Dr. Anuradha V. K.", page: 2832, volume: 3 },
+  { chapter: 302, title: "Sarcoidosis: Epidemiology, Pathogenesis, Clinical Features and Differential Diagnosis", author: "Dr. Anuradha V.K.", page: 2836, volume: 3 },
+  { chapter: 303, title: "Sarcoidosis: Diagnosis, Investigations and Treatment", author: "Dr. Anuradha V.K.", page: 2845, volume: 3 },
+  { chapter: 304, title: "Vogt Koyanagi Harada's Disease: Clinical Features", author: "Dr. S. Bala Murugan", page: 2854, volume: 3 },
+  { chapter: 305, title: "Vogt Koyanagi Harada's Disease: Investigations and Differential Diagnosis", author: "Dr. S. Bala Murugan", page: 2867, volume: 3 },
+  { chapter: 306, title: "Vogt Koyanagi Harada's Disease: Treatment", author: "Dr. S. Bala Murugan", page: 2887, volume: 3 },
+  { chapter: 307, title: "Sympathetic Ophthalmia", author: "Dr. S. Bala Murugan", page: 2894, volume: 3 },
+  { chapter: 308, title: "The Masquerades", author: "Dr. P. Mahesh Shanmugam", page: 2911, volume: 3 },
+  { chapter: 309, title: "Extra Ocular Muscles and Orbital Fascia: Applied Anatomy", author: "Dr. Sathya T. Ravilla", page: 2923, volume: 4 },
+  { chapter: 310, title: "Physiology of Extra Ocular Muscles", author: "Dr. Sathya T. Ravilla", page: 2931, volume: 4 },
+  { chapter: 311, title: "Binocular Single Vision", author: "Dr. Sathya T. Ravilla", page: 2941, volume: 4 },
+  { chapter: 312, title: "Strabismus: Classification and Etiology", author: "Dr. Sathya T. Ravilla", page: 2952, volume: 4 },
+  { chapter: 313, title: "Approach to a Comitant Deviation Patient", author: "Dr. Meenakshi Swaminathan", page: 2960, volume: 4 },
+  { chapter: 314, title: "Diplopia Chart", author: "Dr. Shashikant Shetty", page: 2974, volume: 4 },
+  { chapter: 315, title: "Hess Chart", author: "Dr. Shashikant Shetty", page: 2980, volume: 4 },
+  { chapter: 316, title: "Infantile Esotropia", author: "Dr. P. Vijayalakshmi", page: 2989, volume: 4 },
+  { chapter: 317, title: "Accommodative Esotropia", author: "Dr. P. Vijayalakshmi", page: 3008, volume: 4 },
+  { chapter: 318, title: "Special Forms of Non-accommodative Esotropia", author: "Dr. P. Vijayalakshmi", page: 3018, volume: 4 },
+  { chapter: 319, title: "Intermittent Exotropia (IXT): Evaluation", author: "Dr. Shashikant Shetty", page: 3032, volume: 4 },
+  { chapter: 320, title: "Intermittent Exotropia (IXT): Management", author: "Dr. Shashikant Shetty", page: 3041, volume: 4 },
+  { chapter: 321, title: "Special Forms of Comitant Exotropia", author: "Dr. Shashikant Shetty", page: 3054, volume: 4 },
+  { chapter: 322, title: "Approach to Vertical Deviations", author: "Dr. P. Vijayalakshmi", page: 3060, volume: 4 },
+  { chapter: 323, title: "Dissociated Vertical Deviation (DVD)", author: "Dr. P. Vijayalakshmi", page: 3063, volume: 4 },
+  { chapter: 324, title: "Pattern Strabismus", author: "Dr. Meenakshi Swaminathan", page: 3071, volume: 4 },
+  { chapter: 325, title: "Paretic Strabismus: General Characteristics", author: "Dr. P. Vijayalakshmi", page: 3094, volume: 4 },
+  { chapter: 326, title: "Paretic Strabismus: Evaluation", author: "Dr. P. Vijayalakshmi", page: 3105, volume: 4 },
+  { chapter: 327, title: "Diagnosis and Management of 3rd Nerve (Oculomotor) Palsy", author: "Dr. P. Vijayalakshmi", page: 3117, volume: 4 },
+  { chapter: 328, title: "Diagnosis and Management of Trochlear Nerve (Superior Oblique) Palsy -- 4th Nerve", author: "Dr. P. Vijayalakshmi", page: 3126, volume: 4 },
+  { chapter: 329, title: "Diagnosis and Management of Abducens Nerve Palsy", author: "Dr. P. Vijayalakshmi", page: 3138, volume: 4 },
+  { chapter: 330, title: "Duane Retraction Syndrome: A Simplified Perspective -- 2021", author: "Dr. Pradeep Sharma", page: 3150, volume: 4 },
+  { chapter: 331, title: "Restrictive Strabismus", author: "Dr. Kalpana Narendran", page: 3162, volume: 4 },
+  { chapter: 332, title: "Brown's Syndrome", author: "Dr. Kalpana Narendran", page: 3170, volume: 4 },
+  { chapter: 333, title: "Monocular Elevation Deficiency (MED)", author: "Dr. Kalpana Narendran", page: 3178, volume: 4 },
+  { chapter: 334, title: "Thyroid Related Strabismus", author: "Dr. Kalpana Narendran", page: 3186, volume: 4 },
+  { chapter: 335, title: "Congenital Fibrosis of Extra Ocular Muscles", author: "Dr. Kalpana Narendran", page: 3193, volume: 4 },
+  { chapter: 336, title: "Optical and Pharmacological", author: "Dr. P. Vijayalakshmi", page: 3197, volume: 4 },
+  { chapter: 337, title: "Orthoptic Exercises", author: "Dr. P. Vijayalakshmi", page: 3211, volume: 4 },
+  { chapter: 338, title: "Accommodative Anomalies", author: "Dr. P. Vijayalakshmi", page: 3227, volume: 4 },
+  { chapter: 339, title: "Surgical Anatomy and Basic Guidelines on Strabismus Surgery", author: "Dr. P. Vijayalakshmi", page: 3240, volume: 4 },
+  { chapter: 340, title: "Instrumentation, Anesthesia, Pre and Post-operative Anesthetic Care", author: "Dr. P. Vijayalakshmi", page: 3251, volume: 4 },
+  { chapter: 341, title: "Recession and Resection on a Horizontal Muscle: Step by Step", author: "Dr. P. Vijayalakshmi", page: 3263, volume: 4 },
+  { chapter: 342, title: "Surgeries on Oblique Muscles", author: "Dr. P. Vijayalakshmi", page: 3277, volume: 4 },
+  { chapter: 343, title: "Complications of Strabismus Surgery", author: "Dr. Kalpana Narendran", page: 3288, volume: 4 },
+  { chapter: 344, title: "Visual Acuity", author: "Dr. Sheetal Savur", page: 3302, volume: 4 },
+  { chapter: 345, title: "Refractive Errors", author: "Dr. Krishna Prasad", page: 3314, volume: 4 },
+  { chapter: 346, title: "Retinoscopy", author: "Dr. Sheetal Savur", page: 3329, volume: 4 },
+  { chapter: 347, title: "Subjective Refraction", author: "Dr. Krishna Prasad", page: 3350, volume: 4 },
+  { chapter: 348, title: "Accommodation and Convergence", author: "Dr. Krishna Prasad", page: 3357, volume: 4 },
+  { chapter: 349, title: "Presbyopia Mechanism, Optical Correction and Surgical Procedures", author: "Dr. Krishna Prasad", page: 3369, volume: 4 },
+  { chapter: 350, title: "Spectacle Lenses, Frames and Vertex Distance", author: "Dr. Sheetal Savur", page: 3380, volume: 4 },
+  { chapter: 351, title: "Bifocals/Trifocals", author: "Dr. Sheetal Savur", page: 3397, volume: 4 },
+  { chapter: 352, title: "Progressive Additional Lenses", author: "Dr. Sheetal Savur", page: 3405, volume: 4 },
+  { chapter: 353, title: "Prisms", author: "Dr. Sheetal Savur", page: 3421, volume: 4 },
+  { chapter: 354, title: "Contact Lenses: Optics, Types and Fitting", author: "Dr. Sheetal Savur", page: 3434, volume: 4 },
+  { chapter: 355, title: "Contact Lenses: Fitting of Soft and Rigid Contact Lenses", author: "Dr. Sheetal Savur", page: 3441, volume: 4 },
+  { chapter: 356, title: "Contact Lenses: Complications", author: "Dr. Sheetal Savur", page: 3450, volume: 4 },
+  { chapter: 357, title: "Contact Lenses: Special Situations", author: "Dr. Sheetal Savur", page: 3456, volume: 4 },
+  { chapter: 358, title: "Color Vision, Contrast Sensitivity and Higher Order Aberrations", author: "Dr. Krishna Prasad", page: 3465, volume: 4 },
+  { chapter: 359, title: "Aberrometer", author: "Dr. Sheetal Savur", page: 3490, volume: 4 },
+  { chapter: 360, title: "Keratometry", author: "Dr. Sheetal Savur", page: 3495, volume: 4 },
+  { chapter: 361, title: "Lensometer", author: "Dr. Sheetal Savur", page: 3504, volume: 4 },
+  { chapter: 362, title: "Low Vision Aids", author: "Dr. Krishna Prasad", page: 3511, volume: 4 },
+  { chapter: 363, title: "Ocular Embryology", author: "Dr. Pranesh Balasubramaniam", page: 3523, volume: 4 },
+  { chapter: 364, title: "How to Write a Theory Paper?", author: "Dr. N. Venkatesh Prajna", page: 3533, volume: 4 },
+  { chapter: 365, title: "How to Describe Clinical Finding in a Uveitis Case?", author: "Dr. N. Venkatesh Prajna", page: 3541, volume: 4 },
+  { chapter: 366, title: "FAQs in a Uveitis Case", author: "Dr. N. Venkatesh Prajna", page: 3549, volume: 4 },
+  { chapter: 367, title: "How to Describe Clinical Finding in a Cornea Case?", author: "Dr. N. Venkatesh Prajna", page: 3564, volume: 4 },
+  { chapter: 368, title: "How to Describe Clinical Finding in a Retina Case?", author: "Dr. N. Venkatesh Prajna", page: 3575, volume: 4 },
+  { chapter: 369, title: "FAQs in a Fundus Case Pertaining to the Retinal Vessels", author: "Dr. N. Venkatesh Prajna", page: 3599, volume: 4 },
+  { chapter: 370, title: "How to Describe Clinical Finding in an Glaucoma Case?", author: "Dr. N. Venkatesh Prajna", page: 3618, volume: 4 },
+  { chapter: 371, title: "How to Describe Clinical Finding in an Orbit Case?", author: "Dr. N. Venkatesh Prajna", page: 3625, volume: 4 },
+  { chapter: 372, title: "FAQs in a Orbit Case", author: "Dr. N. Venkatesh Prajna", page: 3637, volume: 4 },
+  { chapter: 373, title: "How to Describe Management in Examinations?", author: "Dr. N. Venkatesh Prajna", page: 3648, volume: 4 },
+  { chapter: 374, title: "Interpretation of Investigations: HFA", author: "Dr. Usha Tejaswini S.", page: 3650, volume: 4 },
+  { chapter: 375, title: "Interpretation of Investigations: OCT- RNFL", author: "Dr. Usha Tejaswini S.", page: 3672, volume: 4 },
+  { chapter: 376, title: "Interpretation of Investigations: Macular OCT", author: "Dr. Usha Tejaswini S.", page: 3688, volume: 4 },
+  { chapter: 377, title: "Interpretation of Investigations: ASOCT & UBM", author: "Dr. Usha Tejaswini S.", page: 3702, volume: 4 },
+  { chapter: 378, title: "Interpretation of Investigations: FFA", author: "Dr. Usha Tejaswini S.", page: 3712, volume: 4 },
+  { chapter: 379, title: "Interpretation of Investigations: B Scan", author: "Dr. Usha Tejaswini S.", page: 3730, volume: 4 },
+  { chapter: 380, title: "OSCE Glaucoma Part 1 -- I", author: "Dr. Usha Tejaswini S.", page: 3738, volume: 4 },
+  { chapter: 381, title: "OSCE Glaucoma Part 1 -- II", author: "Dr. Usha Tejaswini S.", page: 3750, volume: 4 },
+  { chapter: 382, title: "OSCE: Glaucoma Part 2 -- I", author: "Dr. Annamalai O.", page: 3761, volume: 4 },
+  { chapter: 383, title: "OSCE: Glaucoma Part 2 -- II", author: "Dr. Annamalai O.", page: 3772, volume: 4 },
+  { chapter: 384, title: "OSCE in Posterior Segment Disorders", author: "Dr. Parag K. Shah", page: 3781, volume: 4 },
+  { chapter: 385, title: "OSCE in Neuro-ophthalmology", author: "Dr. Mahesh Kumar", page: 3794, volume: 4 },
+  { chapter: 386, title: "Ophthalmic Instruments: Cataract and Cornea", author: "Dr. Usha Tejaswini S.", page: 3814, volume: 4 },
+  { chapter: 387, title: "Ophthalmic Instruments: Glaucoma, Squint, Retina and Orbit", author: "Dr. Usha Tejaswini S.", page: 3832, volume: 4 }
+        ];
+
+        let currentResults = [];
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        const recentSearches = new Set();
+
+        function getSection(chapter, volume) {
+            const sections = volumeSections[volume];
+            for (let section of sections) {
+                if (chapter >= section.start && chapter <= section.end) {
+                    return section.name;
+                }
+            }
+            return "Unknown Section";
+        }
+
+        function populateFilters() {
+            const volumeFilter = document.getElementById('volumeFilter');
+            const sectionFilter = document.getElementById('sectionFilter');
+            const volumes = Object.keys(volumeSections);
+
+            volumes.forEach(volume => {
+                const option = document.createElement('option');
+                option.value = volume;
+                option.textContent = `Volume ${volume}`;
+                volumeFilter.appendChild(option);
+            });
+
+            volumeFilter.addEventListener('change', updateSectionFilter);
+        }
+
+        function updateSectionFilter() {
+            const volumeFilter = document.getElementById('volumeFilter');
+            const sectionFilter = document.getElementById('sectionFilter');
+            const selectedVolume = volumeFilter.value;
+
+            sectionFilter.innerHTML = '<option value="">All Sections</option>';
+
+            if (selectedVolume) {
+                volumeSections[selectedVolume].forEach(section => {
+                    const option = document.createElement('option');
+                    option.value = section.name;
+                    option.textContent = section.name;
+                    sectionFilter.appendChild(option);
+                });
+            } else {
+                const allSections = new Set();
+                Object.values(volumeSections).forEach(sections => {
+                    sections.forEach(section => allSections.add(section.name));
+                });
+                allSections.forEach(section => {
+                    const option = document.createElement('option');
+                    option.value = section;
+                    option.textContent = section;
+                    sectionFilter.appendChild(option);
+                });
+            }
+
+            searchAndFilterIndex();
+        }
+
+        function searchAndFilterIndex() {
+    const searchTerm = document.getElementById('searchBar').value.toLowerCase();
+    const volumeFilter = document.getElementById('volumeFilter').value;
+    const sectionFilter = document.getElementById('sectionFilter').value;
+    const resultsDiv = document.getElementById('results');
+    resultsDiv.innerHTML = '<p class="loading">Searching...</p>';
+
+    // Update breadcrumbs
+    document.getElementById('volumeBreadcrumb').textContent = volumeFilter ? `Volume ${volumeFilter}` : 'All Volumes';
+    document.getElementById('sectionBreadcrumb').textContent = sectionFilter || 'All Sections';
+
+    // Add to recent searches
+    if (searchTerm) {
+        recentSearches.add(searchTerm);
+        updateRecentSearches();
+    }
+
+    setTimeout(() => {
+        currentResults = indexData.filter(entry => {
+            const entrySection = getSection(entry.chapter, entry.volume);
+            const matchesSearch = searchTerm === '' || 
+                entry.title.toLowerCase().includes(searchTerm) ||
+                entry.author.toLowerCase().includes(searchTerm) ||
+                entry.page.toString().includes(searchTerm) ||
+                entry.chapter.toString().includes(searchTerm) ||
+                entrySection.toLowerCase().includes(searchTerm) ||
+                entry.volume.toString().includes(searchTerm);
+
+            const matchesVolume = volumeFilter === '' || entry.volume.toString() === volumeFilter;
+            const matchesSection = sectionFilter === '' || entrySection === sectionFilter;
+
+            return matchesSearch && matchesVolume && matchesSection;
+        });
+
+        if (currentResults.length === 0 && searchTerm) {
+            resultsDiv.innerHTML = `
+                <p class="loading">No results found.</p>
+                <p>Would you like to search for "${searchTerm}" on the web?</p>
+                <button class="web-search-btn" onclick="searchOnWeb('${searchTerm}')">Search on web</button>
+            `;
+        } else {
+            currentPage = 1;
+            displayResults();
+        }
+    }, 500);
+}
+
+function searchOnWeb(topic) {
+    const searchQuery = encodeURIComponent(topic);
+    const searchUrl = `https://www.google.com/search?q=${searchQuery}`;
+    window.open(searchUrl, '_blank');
+}
+
+function displayResults() {
+    const resultsDiv = document.getElementById('results');
+    resultsDiv.innerHTML = '';
+
+    if (currentResults.length === 0) {
+        resultsDiv.innerHTML = '<p class="loading">No results found.</p>';
+    } else {
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const pageResults = currentResults.slice(startIndex, endIndex);
+
+        pageResults.forEach(entry => {
+            const resultItem = document.createElement('div');
+            resultItem.classList.add('result-item', 'fade-in');
+            resultItem.innerHTML = highlightText(`
+                <h3>${entry.title}</h3>
+                <p><strong>Chapter:</strong> ${entry.chapter}</p>
+                <p><strong>Author:</strong> ${entry.author}</p>
+                <p><strong>Page:</strong> ${entry.page}</p>
+                <p>Volume ${entry.volume}</p>
+                <p><strong>Section:</strong> ${getSection(entry.chapter, entry.volume)}</p>
+            `);
+            
+            // Add web search link
+            const webSearchLink = document.createElement('a');
+            webSearchLink.textContent = 'Search on web';
+            webSearchLink.className = 'web-search-btn';
+            webSearchLink.href = getWebSearchUrl(entry.title);
+            webSearchLink.target = '_blank';
+            webSearchLink.rel = 'noopener noreferrer';
+            resultItem.appendChild(webSearchLink);
+
+            // Add related entries
+            const relatedEntries = getRelatedEntries(entry);
+            if (relatedEntries.length > 0) {
+                const relatedEntriesHtml = relatedEntries.map(e => 
+                    `<a href="#" data-chapter="${e.chapter}">${e.title}</a>`
+                ).join(', ');
+                resultItem.innerHTML += `<div class="related-entries">Related: ${relatedEntriesHtml}</div>`;
+            }
+            
+            resultsDiv.appendChild(resultItem);
+        });
+
+        if (currentResults.length > endIndex) {
+            const loadMoreButton = document.createElement('button');
+            loadMoreButton.textContent = 'Load More';
+            loadMoreButton.onclick = () => {
+                currentPage++;
+                displayResults();
+            };
+            resultsDiv.appendChild(loadMoreButton);
+        }
+    }
+}
+
+function getWebSearchUrl(topic) {
+    const searchQuery = encodeURIComponent(topic);
+    return `https://www.google.com/search?q=${searchQuery}`;
+}
+
+        function highlightText(text) {
+            const searchTerm = document.getElementById('searchBar').value.toLowerCase();
+            if (!searchTerm) return text;
+            
+            const regex = new RegExp(searchTerm, 'gi');
+            return text.replace(regex, match => `<span class="highlight">${match}</span>`);
+        }
+
+        function getRelatedEntries(entry) {
+            // Simple related entries based on the same author or nearby chapters
+            return indexData.filter(e => 
+                (e.author === entry.author || Math.abs(e.chapter - entry.chapter) <= 2) && 
+                e.chapter !== entry.chapter
+            ).slice(0, 3);
+        }
+
+        function updateRecentSearches() {
+            const recentSearchesDiv = document.getElementById('recentSearches');
+            recentSearchesDiv.innerHTML = Array.from(recentSearches).slice(-5).map(search => 
+                `<span onclick="setSearch('${search}')">${search}</span>`
+            ).join('');
+        }
+
+        function setSearch(term) {
+            document.getElementById('searchBar').value = term;
+            searchAndFilterIndex();
+        }
+
+
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                const results = document.querySelectorAll('.result-item');
+                const currentFocus = document.activeElement;
+                let index = Array.from(results).indexOf(currentFocus);
+                
+                if (e.key === 'ArrowDown') index++;
+                else index--;
+
+                if (index >= 0 && index < results.length) {
+                    results[index].focus();
+                }
+            }
+        });
+
+        // Smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-theme');
+        }
+
+        document.getElementById('searchBar').addEventListener('input', searchAndFilterIndex);
+        document.getElementById('volumeFilter').addEventListener('change', searchAndFilterIndex);
+        document.getElementById('sectionFilter').addEventListener('change', searchAndFilterIndex);
+        document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+
+        // Initialize the page
+        populateFilters();
+        searchAndFilterIndex();
+    </script>
+</body>
+</html>
